@@ -24,7 +24,7 @@ jobs:
         role-to-assume: ${{ secrets.AWS_ROLE }}
 
     - name: Install PyTest
-      run: pip install pytest
+      run: pip install -r requirements.txt
     
     - name: Run Tests
       run: python -m pytest
