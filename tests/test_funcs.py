@@ -1,7 +1,4 @@
-import sys
-sys.path.insert(1, '/home/jpal/dev/resume_be/src')
-
-from funcs import get_visitors, add_visitors, sub_visitors
+from src.funcs import get_visitors, add_visitors, sub_visitors
 import pytest
 
 class Funcs:
