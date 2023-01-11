@@ -23,8 +23,28 @@ jobs:
         aws-region: us-east-1
         role-to-assume: ${{ secrets.AWS_ROLE }}
 
-    - name: Install PyTest
+    - name: Install Packages
       run: pip install -r requirements.txt
     
     - name: Run Tests
       run: python -m pytest
+  
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Configure AWS
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-region: us-east-1
+        role-to-assume: ${{ secrets.AWS_ROLE }}
+    
+    - name: Run Terraform
+      run: |
+        cd terraform
+
+        terraform init -input=false
+        terraform apply -input=false -auto-approve
