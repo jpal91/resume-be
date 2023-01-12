@@ -55,4 +55,5 @@ jobs:
     
     - name: Update API Url
       run: |
+        pip install -r requirements.txt
         python src/update_api.py ${{ steps.build.outputs.api-url }}
