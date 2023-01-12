@@ -44,6 +44,7 @@ jobs:
         role-to-assume: ${{ secrets.AWS_ROLE }}
     
     - name: Run Terraform
+      id: terraform
       run: |
         cd terraform
 
@@ -56,4 +57,4 @@ jobs:
     - name: Update API Url
       run: |
         pip install -r requirements.txt
-        python src/update_api.py ${{ steps.build.outputs.api-url }}
+        python src/update_api.py ${{ steps.terraform.outputs.api-url }}
