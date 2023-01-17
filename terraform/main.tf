@@ -18,6 +18,12 @@ terraform {
 
 provider "aws" {
     region = "us-east-1"
+
+    default_tags {
+        tags = {
+            Project = "resume"
+        }
+    }
 }
 
 resource "aws_iam_role" "lambda_role" {

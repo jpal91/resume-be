@@ -17,6 +17,7 @@ resource "aws_api_gateway_method" "proxy_get" {
     resource_id = aws_api_gateway_resource.proxy_get.id
     http_method = "GET"
     authorization = "NONE"
+    api_key_required = true
 }
 
 resource "aws_api_gateway_integration" "get_lambda" {
@@ -52,6 +53,7 @@ resource "aws_api_gateway_method" "proxy_add" {
     resource_id = aws_api_gateway_resource.proxy_add.id
     http_method = "PATCH"
     authorization = "NONE"
+    api_key_required = true
 }
 
 resource "aws_api_gateway_integration" "add_lambda" {
@@ -87,6 +89,7 @@ resource "aws_api_gateway_method" "proxy_sub" {
     resource_id = aws_api_gateway_resource.proxy_sub.id
     http_method = "PATCH"
     authorization = "NONE"
+    api_key_required = true
 }
 
 resource "aws_api_gateway_integration" "sub_lambda" {
@@ -108,6 +111,30 @@ resource "aws_lambda_permission" "apigw-sub" {
     source_arn = "${aws_api_gateway_rest_api.resume_api.execution_arn}/*/*"
 }
 
+resource "aws_api_gateway_usage_plan" "resume-usage" {
+    name = "ResumeAPI-UsagePlan"
+    description = "Usage plan for the Resume API"
+
+    api_stages {
+        api_id = aws_api_gateway_rest_api.resume_api.id
+        stage = "v1"
+    }
+
+    throttle_settings {
+        burst_limit = 10
+        rate_limit = 10
+    }
+}
+
+data "aws_api_gateway_api_key" "key" {
+    id = "ap3olmsbp5"
+}
+
+resource "aws_api_gateway_usage_plan_key" "api-key" {
+    key_id = data.aws_api_gateway_api_key.key.id
+    key_type = "API_KEY"
+    usage_plan_id = aws_api_gateway_usage_plan.resume-usage.id
+}
 
 resource "aws_api_gateway_deployment" "deploy" {
     depends_on = [
@@ -120,6 +147,23 @@ resource "aws_api_gateway_deployment" "deploy" {
     stage_name = "v1"
 }
 
-output "api_url" {
-    value = aws_api_gateway_deployment.deploy.invoke_url
+
+data "aws_route53_zone" "resume" {
+    name = "justinthecloud.dev"
+}
+
+data "aws_api_gateway_domain_name" "api" {
+    domain_name = "api.justinthecloud.dev"
+}
+
+resource "aws_route53_record" "api" {
+    zone_id = data.aws_route53_zone.resume.zone_id
+    name = "api.justinthecloud.dev"
+    type = "A"
+
+    alias {
+        name = data.aws_api_gateway_domain_name.api.cloudfront_domain_name
+        zone_id = data.aws_api_gateway_domain_name.api.cloudfront_zone_id
+        evaluate_target_health = true
+    }
 }
