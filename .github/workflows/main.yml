@@ -44,17 +44,8 @@ jobs:
         role-to-assume: ${{ secrets.AWS_ROLE }}
     
     - name: Run Terraform
-      id: terraform
       run: |
         cd terraform
 
         terraform init -input=false
         terraform apply -input=false -auto-approve
-
-        export API_URL=$(terraform output api_url)
-        echo "api-url=$API_URL" >> $GITHUB_OUTPUT
-    
-    - name: Update API Url
-      run: |
-        pip install -r requirements.txt
-        python src/update_api.py ${{ steps.terraform.outputs.api-url }}
